@@ -86,49 +86,102 @@
       <h3 style="color:var(--accent);margin:0 0 6px">Analytics</h3>
       <div id="analyticsContent" class="summary">No data yet.</div>
     </div>
-
-    <!-- ADMIN PANEL -->
-    <!-- ADMIN PANEL -->
-    <div id="adminPanel" class="panel" style="margin-top:10px; display:none">
-      <h1>Access Code Admin</h1>
-
-      <div class="summary">Manage access codes, revoke codes, and rotate keys.</div>
-
-      <label>Current Access Code</label>
-      <input id="adminCurrentCode" disabled />
-
-      <label>Set New Access Code</label>
-      <input id="adminNewCode" maxlength="6" placeholder="Enter 6-digit code" />
-
-      <button id="adminSetCode" class="btn btn-primary" style="margin-top:8px">
-        Update Access Code
-      </button>
-
-      <hr style="margin:14px 0; border-color:#223">
-
-      <h3 style="color:var(--accent);margin:0 0 6px">Revoked Codes</h3>
-      <div id="revokedList" class="summary" style="min-height:40px">None</div>
-
-      <label>Add Code to Revoke</label>
-      <input id="adminRevokeInput" maxlength="6" placeholder="Enter 6-digit code" />
-
-      <button id="adminRevokeBtn" class="btn btn-danger" style="margin-top:8px">
-        Revoke Code
-      </button>
-
-      <label style="margin-top:12px">Remove Revoked Code</label>
-      <input id="adminUnrevokeInput" maxlength="6" placeholder="Enter code to restore" />
-
-      <button id="adminUnrevokeBtn" class="btn btn-ghost" style="margin-top:8px">
-        Unrevoke Code
-      </button>
-
-      <div id="adminMsg" class="summary" style="margin-top:10px"></div>
-    </div>
-  </div>
-  
-  
 </div>
-<script src="algorithm.js"></script>
+<script src="admin_login.js"></script>
+
+
+
+<script>
+/* ============================
+   ELEMENTS
+============================ */
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const markWinBtn = document.getElementById('markWin');
+const markLoseBtn = document.getElementById('markLose');
+const markTieBtn = document.getElementById('markTie');
+
+const labelAEl = document.getElementById('labelA');
+const labelBEl = document.getElementById('labelB');
+const baseBetEl = document.getElementById('baseBet');
+const roundStepEl = document.getElementById('roundStep');
+const capitalEl = document.getElementById('capital');
+const multiplierEl = document.getElementById('multiplier');
+const targetRoundsEl = document.getElementById('targetRounds');
+const startSideEl = document.getElementById('startSide');
+
+const statusEl = document.getElementById('status');
+const analyticsEl = document.getElementById('analyticsContent');
+const timerStatusEl = document.getElementById('timerStatus');
+
+/* ============================
+   UI UPDATE
+============================ */
+function updateUI(data) {
+  statusEl.innerHTML = `
+    <b>Next:</b> ${data.next} |
+    <b>Bet:</b> ${data.bet} |
+    <b>Capital:</b> ${data.capital} |
+    <b>Round:</b> ${data.roundsDone}
+  `;
+
+  analyticsEl.innerHTML = `
+    Wins: ${data.wins} |
+    Losses: ${data.losses} |
+    Profit: ${data.profit}
+  `;
+
+  timerStatusEl.innerText = data.active ? "Active" : "Inactive";
+}
+
+/* ============================
+   API CALL HELPER
+============================ */
+async function callEngine(endpoint, body = null) {
+  const res = await fetch(`/engine/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: body ? JSON.stringify(body) : null
+  });
+
+  const data = await res.json();
+  updateUI(data);
+}
+
+/* ============================
+   BUTTON EVENTS
+============================ */
+
+startBtn.onclick = async () => {
+  await callEngine("start", {
+    labelA: labelAEl.value,
+    labelB: labelBEl.value,
+    baseBet: Number(baseBetEl.value),
+    roundStep: Number(roundStepEl.value),
+    capital: Number(capitalEl.value),
+    multiplier: Number(multiplierEl.value),
+    targetRounds: Number(targetRoundsEl.value),
+    startSide: startSideEl.value
+  });
+};
+
+stopBtn.onclick = async () => {
+  await callEngine("stop");
+};
+
+markWinBtn.onclick = async () => {
+  await callEngine("win");
+};
+
+markLoseBtn.onclick = async () => {
+  await callEngine("lose");
+};
+
+markTieBtn.onclick = async () => {
+  await callEngine("tie");
+};
+
+</script>
+</script>
 </body>
 </html>
