@@ -32,6 +32,11 @@
             style="float:right;margin-top:-30px;width:100px;color:#ff4d4d;font-weight:700">
       ADMIN
     </button>
+    <button id="logoutBtn" 
+            class="btn btn-ghost" 
+            style="float:right;margin-top:-30px;margin-right:110px;width:100px;color:#888;font-weight:700">
+      LOGOUT
+    </button>
     <div class="summary">Status: <b id="timerStatus">Inactive</b></div>
   </div>
   
@@ -88,6 +93,63 @@
     </div>
 </div>
 <script src="admin_login.js"></script>
+
+<!-- Route Protection: Check authentication on page load -->
+<script>
+/* ============================
+   ROUTE PROTECTION
+   Validates session before showing content
+============================ */
+(async function() {
+  const sessionId = localStorage.getItem('userSessionId');
+  
+  if (!sessionId) {
+    // No session - redirect to login
+    window.location.href = '/public/index.html';
+    return;
+  }
+  
+  try {
+    const res = await fetch('http://localhost:3000/auth/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sessionId })
+    });
+    
+    const data = await res.json();
+    
+    if (!data.valid) {
+      // Invalid session - redirect to login
+      localStorage.removeItem('userSessionId');
+      window.location.href = '/public/index.html';
+      return;
+    }
+    
+    // Session valid - show content (remove login overlay if any)
+    console.log('User authenticated');
+    
+    // Add logout button functionality
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await fetch('http://localhost:3000/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        });
+      } catch (e) {
+        // Ignore errors on logout
+      }
+      localStorage.removeItem('userSessionId');
+      window.location.href = '/public/index.html';
+    });
+    
+  } catch (err) {
+    console.error('Auth check failed:', err);
+    // On error, redirect to login
+    window.location.href = '/index.html';
+  }
+})();
+</script>
 
 
 
