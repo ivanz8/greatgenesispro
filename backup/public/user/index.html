@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Great Genesis Pro</title>
-<link rel="stylesheet" href="/assets/style.css">
+<link rel="stylesheet" href="/public/assets/style.css">
 </head>
 <body>
 <!-- ADMIN PIN OVERLAY -->
@@ -105,12 +105,12 @@
   
   if (!sessionId) {
     // No session - redirect to login
-    window.location.href = '/';
+    window.location.href = '/public/index.html';
     return;
   }
   
   try {
-    const res = await fetch('/api/auth/validate', {
+    const res = await fetch('http://localhost:3000/auth/validate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ sessionId })
@@ -121,7 +121,7 @@
     if (!data.valid) {
       // Invalid session - redirect to login
       localStorage.removeItem('userSessionId');
-      window.location.href = '/';
+      window.location.href = '/public/index.html';
       return;
     }
     
@@ -131,7 +131,7 @@
     // Add logout button functionality
     document.getElementById('logoutBtn').addEventListener('click', async () => {
       try {
-        await fetch('/api/auth/logout', {
+        await fetch('http://localhost:3000/auth/logout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId })
@@ -140,13 +140,13 @@
         // Ignore errors on logout
       }
       localStorage.removeItem('userSessionId');
-      window.location.href = '/';
+      window.location.href = '/public/index.html';
     });
     
   } catch (err) {
     console.error('Auth check failed:', err);
     // On error, redirect to login
-    window.location.href = '/';
+    window.location.href = '/index.html';
   }
 })();
 </script>

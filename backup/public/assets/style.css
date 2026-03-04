@@ -1,0 +1,127 @@
+
+  :root {
+    --bg: #0a0e2a;        /* deep navy blue background */
+    --panel: #13294b;     /* darker blue panels */
+    --muted: #ffd966;     /* soft gold for muted text */
+    --accent: #ffcc00;    /* bright gold accent */
+    --white: #f0f8ff;     /* light text */
+    --danger: #ff4d4d;    /* red for danger */
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--white);
+    font-family:Inter,system-ui,Arial;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    gap:12px
+  }
+  .container{max-width:920px;margin:0 auto;padding:14px;width:100%}
+  .panel{
+    background:var(--panel);
+    padding:12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.06)
+  }
+  h1{font-size:18px;margin:0 0 6px;color:var(--accent)}
+  label{display:block;font-size:13px;color:var(--muted);margin-top:6px}
+  input,select,button{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #233;
+    background:#061012;
+    color:var(--white);
+    font-size:14px
+  }
+  .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .row>*{flex:1}
+  .btn{border:none;border-radius:10px;cursor:pointer}
+  .btn-primary{background:var(--accent);color:#012;font-weight:700}
+  .btn-ghost{background:#223;color:var(--muted)}
+  .btn-danger{background:#361515;color:#ffbebe}
+  .log{
+    height:240px;
+    overflow:auto;
+    background:#051013;
+    padding:10px;
+    border-radius:8px;
+    font-family:monospace;
+    white-space:pre-wrap
+  }
+  .summary{color:var(--muted);font-size:14px;padding-top:6px}
+
+  /* ACCESS / PIN OVERLAYS */
+  .lock{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.9);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:9999
+  }
+  .lock .card{
+    max-width:520px;
+    width:100%;
+    background:#0d141c;
+    border:1px solid #123;
+    border-radius:14px;
+    padding:16px;
+    box-shadow:0 0 30px rgba(0,0,0,.6)
+  }
+  .lock h1{
+    margin:0 0 4px;
+    font-size:18px;
+    color:var(--accent);
+    text-align:center
+  }
+  .lock .summary{
+    text-align:center;
+    padding-top:2px
+  }
+
+  /* 6-DIGIT CODE INPUT */
+  .code-container{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    margin-top:14px
+  }
+  .code-input{
+    width:46px;
+    height:52px;
+    border-radius:10px;
+    border:1px solid rgba(255,204,0,.5);
+    background:#03080e;
+    color:var(--accent);
+    font-size:24px;
+    text-align:center;
+    outline:none;
+    box-shadow:0 0 10px rgba(255,204,0,.3);
+    text-shadow:0 0 6px rgba(255,204,0,.7);
+    transition:.18s ease
+  }
+  .code-input:focus{
+    transform:scale(1.06);
+    box-shadow:0 0 14px rgba(255,204,0,.7);
+  }
+
+  .lock-btn{
+    margin-top:16px
+  }
+  .lock-status{
+    margin-top:10px;
+    font-size:13px;
+    text-align:center;
+    color:var(--muted)
+  }
+  .lock-status.error{
+    color:var(--danger)
+  }
+  .lock-status.success{
+    color:#7dff8a
+  }

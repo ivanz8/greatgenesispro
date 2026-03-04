@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel</title>
-    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="/public/assets/style.css">
 </head>
 <body>
     <!-- Route Protection: Check admin authentication on page load -->
@@ -14,12 +14,12 @@
       
       if (!sessionId) {
         // No session - redirect to login
-        window.location.href = '/';
+        window.location.href = '/public/index.html';
         return;
       }
       
       try {
-        const res = await fetch('/api/auth/validate-admin', {
+        const res = await fetch('http://localhost:3000/auth/validate-admin', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ sessionId })
@@ -30,7 +30,7 @@
         if (!data.success || !data.isAdmin) {
           // Not admin - redirect to user page
           localStorage.removeItem('adminSessionId');
-          window.location.href = '/user/index.html';
+          window.location.href = '/public/user/index.html';
           return;
         }
         
@@ -43,7 +43,7 @@
         
       } catch (err) {
         console.error('Admin auth check failed:', err);
-        window.location.href = '/';
+        window.location.href = '/public/index.html';
       }
     })();
     </script>

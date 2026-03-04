@@ -1,6 +1,15 @@
 {
+  "name": "greatgenesispro",
+  "version": "1.0.0",
+  "description": "Genesis 777 Corporation - Gaming Algorithm Platform",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "dev": "node src/server.js",
+    "vercel-build": "echo 'Build complete'"
+  },
+  "engines": {
+    "node": ">=18.x"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",

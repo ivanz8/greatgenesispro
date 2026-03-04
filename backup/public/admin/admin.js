@@ -21,7 +21,7 @@ let pinsData = [];
 // Load pins from Firebase on page load
 async function loadPins() {
   try {
-    const res = await fetch('/api/admin/pins');
+    const res = await fetch('http://localhost:3000/admin/pins');
     const data = await res.json();
     
     if (data.success) {
@@ -100,7 +100,7 @@ adminCreatePin.addEventListener('click', async () => {
       return;
     }
     
-    const res = await fetch('/api/admin/pins/create', {
+    const res = await fetch('http://localhost:3000/admin/pins/create', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -146,7 +146,7 @@ adminRevokeBtn.addEventListener('click', async () => {
   adminMsg.style.color = "var(--accent)";
 
   try {
-    const res = await fetch('/api/admin/pins/revoke', {
+    const res = await fetch('http://localhost:3000/admin/pins/revoke', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: code })
@@ -180,7 +180,7 @@ adminUnrevokeBtn.addEventListener('click', async () => {
   adminMsg.style.color = "var(--accent)";
 
   try {
-    const res = await fetch('/api/admin/pins/unrevoke', {
+    const res = await fetch('http://localhost:3000/admin/pins/unrevoke', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ pin: code })

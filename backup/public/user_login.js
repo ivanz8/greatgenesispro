@@ -47,7 +47,7 @@ let currentAccessCode = "";
 
     try {
       // Server-side authentication
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('http://localhost:3000/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin: entered })
@@ -62,7 +62,7 @@ let currentAccessCode = "";
         loginMsg.className = "lock-status success";
 
         setTimeout(() => {
-          window.location.href = '/user/index.html';
+          window.location.href = '/public/user/index.html';
         }, 400);
       } else {
         loginMsg.textContent = data.message || "Invalid access code.";

@@ -25,7 +25,7 @@ adminPinSubmit.addEventListener('click', async () => {
     adminPinMsg.textContent = "Session expired. Please login again.";
     adminPinMsg.className = "lock-status error";
     setTimeout(() => {
-      window.location.href = '/';
+      window.location.href = '/public/index.html';
     }, 1500);
     return;
   }
@@ -38,7 +38,7 @@ adminPinSubmit.addEventListener('click', async () => {
 
   try {
     // Validate session and check admin role via server
-    const res = await fetch('/api/auth/check-admin', {
+    const res = await fetch('http://localhost:3000/auth/check-admin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -53,7 +53,7 @@ adminPinSubmit.addEventListener('click', async () => {
       // Admin access granted - store admin session
       localStorage.setItem('adminSessionId', data.adminSessionId);
       adminPinOverlay.style.display = "none";
-      window.location.href = "/admin/index.html";
+      window.location.href = "/public/admin/index.html";
     } else if (data.success && !data.isAdmin) {
       // User is logged in but not admin
       adminPinMsg.textContent = "Access denied. Admin role required.";
