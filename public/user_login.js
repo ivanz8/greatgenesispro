@@ -1,4 +1,4 @@
-let currentAccessCode = "123456";
+let currentAccessCode = "";
 
   // Revoked codes – any code here will always be denied
   const revokedCodes = [
@@ -36,11 +36,7 @@ let currentAccessCode = "123456";
     return Array.from(codeInputs).map(i => i.value).join('');
   }
 
-  function isRevoked(code) {
-    return revokedCodes.includes(code);
-  }
-
-  loginBtn.addEventListener('click', () => {
+  loginBtn.addEventListener('click', async () => {
     const entered = getEnteredCode();
 
     if (entered.length < 6) {
@@ -49,21 +45,32 @@ let currentAccessCode = "123456";
       return;
     }
 
-    if (isRevoked(entered)) {
-      loginMsg.textContent = "This access code has been revoked.";
-      loginMsg.className = "lock-status error";
-      return;
-    }
+    try {
+      // Server-side authentication
+      const res = await fetch('http://localhost:3000/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: entered })
+      });
 
-    if (entered === currentAccessCode) {
-      loginMsg.textContent = "Access granted.";
-      loginMsg.className = "lock-status success";
+      const data = await res.json();
 
-      setTimeout(() => {
-        window.location.href = 'user/index.html';
-      }, 400);
-    } else {
-      loginMsg.textContent = "Invalid access code.";
+      if (data.success) {
+        // Store session ID in localStorage
+        localStorage.setItem('userSessionId', data.sessionId);
+        loginMsg.textContent = "Access granted.";
+        loginMsg.className = "lock-status success";
+
+        setTimeout(() => {
+          window.location.href = '/public/user/index.html';
+        }, 400);
+      } else {
+        loginMsg.textContent = data.message || "Invalid access code.";
+        loginMsg.className = "lock-status error";
+      }
+    } catch (err) {
+      loginMsg.textContent = "Server error. Please try again.";
       loginMsg.className = "lock-status error";
+      console.error('Login error:', err);
     }
   });

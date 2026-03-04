@@ -55,9 +55,10 @@ class Engine {
   }
 
   win() {
-    if (!this.active) return this.getState("Not active");
+    if (!this.active) return this.getState("Ignored WIN (not active).");
 
     const pred = this.nextPrediction();
+    const predLabel = pred === this.settings.labelA ? this.settings.labelA : this.settings.labelB;
     this.profit += this.bet;
     this.capital += this.bet;
     this.wins++;
@@ -65,35 +66,40 @@ class Engine {
 
     this.lastWinner = pred === this.settings.labelA ? 'a' : 'b';
     this.roundsDone++;
+    const logMsg = `WIN | Pred=${predLabel} | +${this.bet} | Cap=${this.capital} | Round ${this.roundsDone}`;
     this.bet = this.roundTo(this.settings.baseBet);
 
-    return this.getState("WIN");
+    return this.getState(logMsg);
   }
 
   lose() {
-    if (!this.active) return this.getState("Not active");
+    if (!this.active) return this.getState("Ignored LOSE (not active).");
 
     const pred = this.nextPrediction();
+    const predLabel = pred === this.settings.labelA ? this.settings.labelA : this.settings.labelB;
 
     this.profit -= this.bet;
     this.capital -= this.bet;
     this.losses++;
 
+    const oldBet = this.bet;
     this.bet = this.roundTo(this.bet * this.settings.multiplier);
     this.seqIndex++;
     this.lastWinner = pred === this.settings.labelA ? 'b' : 'a';
     this.roundsDone++;
+    const logMsg = `LOSE | Pred=${predLabel} | NextBet=${this.bet} | Cap=${this.capital} | Round ${this.roundsDone}`;
 
-    return this.getState("LOSE");
+    return this.getState(logMsg);
   }
 
   tie() {
-    if (!this.active) return this.getState("Not active");
+    if (!this.active) return this.getState("Ignored TIE (not active).");
 
     this.seqIndex = 0;
     this.roundsDone++;
+    const logMsg = `TIE | sequence reset only (bet stays ${this.bet}) | Round ${this.roundsDone}`;
 
-    return this.getState("TIE");
+    return this.getState(logMsg);
   }
 
   getState(message = "") {
