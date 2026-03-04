@@ -7,40 +7,101 @@
     <link rel="stylesheet" href="/public/assets/style.css">
 </head>
 <body>
+    <!-- Route Protection: Check admin authentication on page load -->
+    <script>
+    (async function() {
+      const sessionId = localStorage.getItem('adminSessionId') || localStorage.getItem('userSessionId');
+      
+      if (!sessionId) {
+        // No session - redirect to login
+        window.location.href = '/public/index.html';
+        return;
+      }
+      
+      try {
+        const res = await fetch('http://localhost:3000/auth/validate-admin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        const data = await res.json();
+        
+        if (!data.success || !data.isAdmin) {
+          // Not admin - redirect to user page
+          localStorage.removeItem('adminSessionId');
+          window.location.href = '/public/user/index.html';
+          return;
+        }
+        
+        console.log('Admin authenticated');
+        
+        // Store admin session if not already
+        if (data.adminSessionId) {
+          localStorage.setItem('adminSessionId', data.adminSessionId);
+        }
+        
+      } catch (err) {
+        console.error('Admin auth check failed:', err);
+        window.location.href = '/public/index.html';
+      }
+    })();
+    </script>
+    
     <!-- ADMIN PANEL -->
     <div id="adminPanel" class="panel" style="margin-top:10px; display:show">
       <h1>Access Code Admin</h1>
 
       <div class="summary">Manage access codes, revoke codes, and rotate keys.</div>
 
-      <label>Current Access Code</label>
-      <input id="adminCurrentCode" disabled />
+      <label>Current Admin Access Code</label>
+      <input id="adminCurrentCode" disabled style="font-weight:bold;color:#7dff8a" />
 
-      <label>Set New Access Code</label>
-      <input id="adminNewCode" maxlength="6" placeholder="Enter 6-digit code" />
+      <hr style="margin:14px 0; border-color:#223">
 
-      <button id="adminSetCode" class="btn btn-primary" style="margin-top:8px">
-        Update Access Code
+      <h3 style="color:var(--accent);margin:0 0 6px">All Access Codes</h3>
+      <div id="allPinsList" class="summary" style="min-height:60px;max-height:150px;overflow-y:auto;border:1px solid #334;padding:8px;background:#1a1a2e">Loading...</div>
+
+      <hr style="margin:14px 0; border-color:#223">
+
+      <h3 style="color:var(--accent);margin:0 0 6px">Create New Access Code</h3>
+      <div class="row">
+        <div style="flex:1"><label>New PIN (6 digits)</label><input id="adminNewPin" maxlength="6" placeholder="123456" /></div>
+        <div style="flex:1"><label>Name</label><input id="adminNewName" placeholder="User Name" /></div>
+        <div style="flex:1"><label>Role</label>
+          <select id="adminNewRole" style="width:100%;padding:8px;background:#1a1a2e;color:#fff;border:1px solid #334;border-radius:4px">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+            <option value="vip">VIP</option>
+            <option value="staff">Staff</option>
+            <option value="manager">Manager</option>
+          </select>
+        </div>
+      </div>
+      <button id="adminCreatePin" class="btn btn-primary" style="margin-top:8px">
+        Create New PIN
       </button>
 
       <hr style="margin:14px 0; border-color:#223">
 
       <h3 style="color:var(--accent);margin:0 0 6px">Revoked Codes</h3>
-      <div id="revokedList" class="summary" style="min-height:40px">None</div>
+      <div id="revokedList" class="summary" style="min-height:60px;max-height:100px;overflow-y:auto;border:1px solid #334;padding:8px;background:#1a1a2e">Loading...</div>
 
-      <label>Add Code to Revoke</label>
-      <input id="adminRevokeInput" maxlength="6" placeholder="Enter 6-digit code" />
+      <div class="row" style="margin-top:12px">
+        <div style="flex:1"><label>Add Code to Revoke</label>
+          <input id="adminRevokeInput" maxlength="6" placeholder="Enter 6-digit code" /></div>
+        <div style="flex:1"><label>Remove Revoked Code</label>
+          <input id="adminUnrevokeInput" maxlength="6" placeholder="Enter code to restore" /></div>
+      </div>
 
-      <button id="adminRevokeBtn" class="btn btn-danger" style="margin-top:8px">
-        Revoke Code
-      </button>
-
-      <label style="margin-top:12px">Remove Revoked Code</label>
-      <input id="adminUnrevokeInput" maxlength="6" placeholder="Enter code to restore" />
-
-      <button id="adminUnrevokeBtn" class="btn btn-ghost" style="margin-top:8px">
-        Unrevoke Code
-      </button>
+      <div class="row" style="margin-top:8px">
+        <button id="adminRevokeBtn" class="btn btn-danger" style="margin-top:8px">
+          Revoke Code
+        </button>
+        <button id="adminUnrevokeBtn" class="btn btn-ghost" style="margin-top:8px">
+          Unrevoke Code
+        </button>
+      </div>
 
       <div id="adminMsg" class="summary" style="margin-top:10px"></div>
     </div>
