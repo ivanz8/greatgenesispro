@@ -1,13 +1,11 @@
 // Vercel Serverless Entry Point
-const path = require('path');
 const Fastify = require('fastify');
 const cors = require('@fastify/cors');
-const fastifyStatic = require('@fastify/static');
 const Engine = require('../src/services/algorithm.service');
 
 // Initialize Fastify app
 const app = Fastify({ 
-  logger: process.env.NODE_ENV === 'development',
+  logger: false,
   trustProxy: true 
 });
 
@@ -73,7 +71,7 @@ app.get('/api/health', async () => {
 });
 
 // Auth - Login
-app.post('/api/auth/login', async (request) => {
+app.post('/api/auth/login', async (request, reply) => {
   const { pin } = request.body || {};
   
   if (!pin || pin.length !== 6 || !/^\d{6}$/.test(pin)) {
@@ -245,27 +243,27 @@ app.post('/api/engine/tie', async () => {
   return engine.tie();
 });
 
+// Engine Status
+app.post('/api/engine/status', async () => {
+  return engine.getState();
+});
+
 /* ===== ADMIN PIN MANAGEMENT ROUTES ===== */
 
 // Get all pins
 app.get('/api/admin/pins', async () => {
-  try {
-    const response = await fetch(`${FIREBASE_DB_URL}/pins.json`);
-    if (!response.ok) {
-      throw new Error(`Firebase error: ${response.status}`);
-    }
-    const data = await response.json();
-    
-    const pins = data ? Object.entries(data).map(([pin, value]) => ({
-      pin,
-      ...value
-    })) : [];
-    
-    return { success: true, pins };
-  } catch (error) {
-    console.error('Error fetching pins:', error);
-    return { success: false, message: error.message };
+  const response = await fetch(`${FIREBASE_DB_URL}/pins.json`);
+  if (!response.ok) {
+    throw new Error(`Firebase error: ${response.status}`);
   }
+  const data = await response.json();
+  
+  const pins = data ? Object.entries(data).map(([pin, value]) => ({
+    pin,
+    ...value
+  })) : [];
+  
+  return { success: true, pins };
 });
 
 // Create PIN
@@ -280,35 +278,30 @@ app.post('/api/admin/pins/create', async (request) => {
     return { success: false, message: "Name is required." };
   }
   
-  try {
-    const existing = await fetchPinFromFirebase(pin);
-    if (existing) {
-      return { success: false, message: "PIN already exists. Use update instead." };
-    }
-    
-    const newPin = {
-      id: `user_${Date.now()}`,
-      name: name,
-      role: role || 'user',
-      active: active !== false,
-      createdAt: new Date().toISOString()
-    };
-    
-    const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newPin)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Firebase error: ${response.status}`);
-    }
-    
-    return { success: true, message: "PIN created successfully.", pin: newPin };
-  } catch (error) {
-    console.error('Error creating pin:', error);
-    return { success: false, message: error.message };
+  const existing = await fetchPinFromFirebase(pin);
+  if (existing) {
+    return { success: false, message: "PIN already exists. Use update instead." };
   }
+  
+  const newPin = {
+    id: `user_${Date.now()}`,
+    name: name,
+    role: role || 'user',
+    active: active !== false,
+    createdAt: new Date().toISOString()
+  };
+  
+  const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newPin)
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Firebase error: ${response.status}`);
+  }
+  
+  return { success: true, message: "PIN created successfully.", pin: newPin };
 });
 
 // Update PIN
@@ -319,35 +312,30 @@ app.post('/api/admin/pins/update', async (request) => {
     return { success: false, message: "Invalid PIN format. Must be 6 digits." };
   }
   
-  try {
-    const existing = await fetchPinFromFirebase(pin);
-    if (!existing) {
-      return { success: false, message: "PIN not found." };
-    }
-    
-    const updatedPin = {
-      ...existing,
-      name: name || existing.name,
-      role: role || existing.role,
-      active: active !== undefined ? active : existing.active,
-      updatedAt: new Date().toISOString()
-    };
-    
-    const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(updatedPin)
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Firebase error: ${response.status}`);
-    }
-    
-    return { success: true, message: "PIN updated successfully.", pin: updatedPin };
-  } catch (error) {
-    console.error('Error updating pin:', error);
-    return { success: false, message: error.message };
+  const existing = await fetchPinFromFirebase(pin);
+  if (!existing) {
+    return { success: false, message: "PIN not found." };
   }
+  
+  const updatedPin = {
+    ...existing,
+    name: name || existing.name,
+    role: role || existing.role,
+    active: active !== undefined ? active : existing.active,
+    updatedAt: new Date().toISOString()
+  };
+  
+  const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedPin)
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Firebase error: ${response.status}`);
+  }
+  
+  return { success: true, message: "PIN updated successfully.", pin: updatedPin };
 });
 
 // Revoke PIN
@@ -358,27 +346,22 @@ app.post('/api/admin/pins/revoke', async (request) => {
     return { success: false, message: "Invalid PIN format. Must be 6 digits." };
   }
   
-  try {
-    const existing = await fetchPinFromFirebase(pin);
-    if (!existing) {
-      return { success: false, message: "PIN not found." };
-    }
-    
-    const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ active: false, revokedAt: new Date().toISOString() })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Firebase error: ${response.status}`);
-    }
-    
-    return { success: true, message: "PIN revoked successfully." };
-  } catch (error) {
-    console.error('Error revoking pin:', error);
-    return { success: false, message: error.message };
+  const existing = await fetchPinFromFirebase(pin);
+  if (!existing) {
+    return { success: false, message: "PIN not found." };
   }
+  
+  const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ active: false, revokedAt: new Date().toISOString() })
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Firebase error: ${response.status}`);
+  }
+  
+  return { success: true, message: "PIN revoked successfully." };
 });
 
 // Unrevoke PIN
@@ -389,27 +372,22 @@ app.post('/api/admin/pins/unrevoke', async (request) => {
     return { success: false, message: "Invalid PIN format. Must be 6 digits." };
   }
   
-  try {
-    const existing = await fetchPinFromFirebase(pin);
-    if (!existing) {
-      return { success: false, message: "PIN not found." };
-    }
-    
-    const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ active: true, unrevokedAt: new Date().toISOString() })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Firebase error: ${response.status}`);
-    }
-    
-    return { success: true, message: "PIN restored successfully." };
-  } catch (error) {
-    console.error('Error unrevoking pin:', error);
-    return { success: false, message: error.message };
+  const existing = await fetchPinFromFirebase(pin);
+  if (!existing) {
+    return { success: false, message: "PIN not found." };
   }
+  
+  const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ active: true, unrevokedAt: new Date().toISOString() })
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Firebase error: ${response.status}`);
+  }
+  
+  return { success: true, message: "PIN restored successfully." };
 });
 
 // Delete PIN
@@ -420,36 +398,18 @@ app.delete('/api/admin/pins/:pin', async (request) => {
     return { success: false, message: "Invalid PIN format. Must be 6 digits." };
   }
   
-  try {
-    const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
-      method: 'DELETE'
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Firebase error: ${response.status}`);
-    }
-    
-    return { success: true, message: "PIN deleted successfully." };
-  } catch (error) {
-    console.error('Error deleting pin:', error);
-    return { success: false, message: error.message };
+  const response = await fetch(`${FIREBASE_DB_URL}/pins/${pin}.json`, {
+    method: 'DELETE'
+  });
+  
+  if (!response.ok) {
+    throw new Error(`Firebase error: ${response.status}`);
   }
+  
+  return { success: true, message: "PIN deleted successfully." };
 });
 
-/* ===== STATIC FILES ===== */
-app.register(fastifyStatic, {
-  root: path.join(__dirname, '../public'),
-  prefix: '/',
-  wildcard: false
-});
-
-/* ===== SPA FALLBACK ===== */
-// Serve index.html for root path
-app.get('/', async (request, reply) => {
-  return reply.sendFile('index.html');
-});
-
-// Export handler for Vercel
+// Build the app and export handler
 module.exports = async (req, res) => {
   await app.ready();
   app.server.emit('request', req, res);

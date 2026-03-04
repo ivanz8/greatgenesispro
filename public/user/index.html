@@ -26,15 +26,15 @@
 <!-- APP -->
 <div class="container">
   <div class="panel">
-    <h1>Genesis 777 Corporation</h1>
+    <h1>Great Genesis Pro</h1>
     <button id="openAdmin" 
             class="btn btn-ghost" 
-            style="float:right;margin-top:-30px;width:100px;color:#ff4d4d;font-weight:700">
+            style="float:right;margin-top:-30px;width:80px;color:#ff4d4d;font-weight:700">
       ADMIN
     </button>
     <button id="logoutBtn" 
             class="btn btn-ghost" 
-            style="float:right;margin-top:-30px;margin-right:110px;width:100px;color:#888;font-weight:700">
+            style="float:right;margin-top:-30px;margin-right:30px;width:80px;color:#888;font-weight:700">
       LOGOUT
     </button>
     <div class="summary">Status: <b id="timerStatus">Inactive</b></div>
@@ -208,7 +208,7 @@ function updateUI(data) {
 ============================ */
 async function callEngine(endpoint, body = null) {
   try {
-    const res = await fetch(`http://localhost:3000/engine/${endpoint}`, {
+    const res = await fetch(`/api/engine/${endpoint}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: body ? JSON.stringify(body) : '{}'
@@ -257,6 +257,97 @@ markLoseBtn.onclick = async () => {
 
 markTieBtn.onclick = async () => {
   await callEngine("tie");
+};
+
+/* ============================
+   ASSIST BUTTONS
+============================ */
+const assistCopyBtn = document.getElementById('assistCopy');
+const assistSpeakBtn = document.getElementById('assistSpeak');
+
+// Copy Next Bet to Clipboard
+assistCopyBtn.onclick = async () => {
+  try {
+    // Get current engine state by calling a status endpoint or use last known state
+    const res = await fetch('/api/engine/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+    
+    let textToCopy;
+    if (res.ok) {
+      const data = await res.json();
+      textToCopy = `Next: ${data.next || 'N/A'}, Bet: ${data.bet || 'N/A'}`;
+    } else {
+      // Fallback: copy current status text
+      textToCopy = statusEl.innerText;
+    }
+    
+    await navigator.clipboard.writeText(textToCopy);
+    statusEl.innerHTML = `<span style="color:#7dff8a">✓ Copied to clipboard: ${textToCopy}</span>`;
+    
+    const time = new Date().toLocaleTimeString();
+    logEl.textContent += `[${time}] Copied: ${textToCopy}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  } catch (err) {
+    console.error('Copy failed:', err);
+    statusEl.innerHTML = `<span style="color:red">Copy failed: ${err.message}</span>`;
+  }
+};
+
+// Speak Next Bet using Web Speech API
+assistSpeakBtn.onclick = async () => {
+  try {
+    if (!('speechSynthesis' in window)) {
+      statusEl.innerHTML = `<span style="color:red">Speech not supported in this browser</span>`;
+      return;
+    }
+    
+    // Get current engine state
+    const res = await fetch('/api/engine/status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+    
+    let textToSpeak;
+    if (res.ok) {
+      const data = await res.json();
+      textToSpeak = `Next bet is ${data.next || 'unknown'}, bet amount ${data.bet || 'unknown'}`;
+    } else {
+      // Fallback: speak status text
+      textToSpeak = statusEl.innerText.replace(/<[^>]*>/g, ''); // Remove HTML tags
+    }
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    utterance.rate = 1;
+    utterance.pitch = 1;
+    utterance.lang = 'en-US';
+    
+    utterance.onstart = () => {
+      statusEl.innerHTML = `<span style="color:var(--accent)">🔊 Speaking: ${textToSpeak}</span>`;
+    };
+    
+    utterance.onend = () => {
+      const time = new Date().toLocaleTimeString();
+      logEl.textContent += `[${time}] Spoke: ${textToSpeak}\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    };
+    
+    utterance.onerror = (err) => {
+      console.error('Speech error:', err);
+      statusEl.innerHTML = `<span style="color:red">Speech error: ${err.error}</span>`;
+    };
+    
+    window.speechSynthesis.speak(utterance);
+  } catch (err) {
+    console.error('Speak failed:', err);
+    statusEl.innerHTML = `<span style="color:red">Speak failed: ${err.message}</span>`;
+  }
 };
 
 </script>
