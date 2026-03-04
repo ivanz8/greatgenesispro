@@ -1,8 +1,14 @@
 const path = require('path');
 const fastify = require('fastify')({ logger: true });
+const cors = require('@fastify/cors');
 const Engine = require('./services/algorithm.service');
 
 const engine = new Engine();
+
+/* ===== REGISTER CORS ===== */
+fastify.register(cors, { 
+  origin: true 
+});
 
 /* ===== REGISTER API ROUTES FIRST ===== */
 
@@ -29,7 +35,7 @@ fastify.post('/engine/tie', async () => {
 /* ===== THEN REGISTER STATIC FILES ===== */
 
 fastify.register(require('@fastify/static'), {
-  root: path.join(__dirname, 'public'),
+  root: path.join(__dirname, '../public'),
   prefix: '/',
 });
 

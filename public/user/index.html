@@ -111,6 +111,7 @@ const targetRoundsEl = document.getElementById('targetRounds');
 const startSideEl = document.getElementById('startSide');
 
 const statusEl = document.getElementById('status');
+const logEl = document.getElementById('log');
 const analyticsEl = document.getElementById('analyticsContent');
 const timerStatusEl = document.getElementById('timerStatus');
 
@@ -132,20 +133,35 @@ function updateUI(data) {
   `;
 
   timerStatusEl.innerText = data.active ? "Active" : "Inactive";
+  
+  if (data.message) {
+    const time = new Date().toLocaleTimeString();
+    logEl.textContent += `[${time}] ${data.message}\n`;
+    logEl.scrollTop = logEl.scrollHeight;
+  }
 }
 
 /* ============================
    API CALL HELPER
 ============================ */
 async function callEngine(endpoint, body = null) {
-  const res = await fetch(`/engine/${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: body ? JSON.stringify(body) : null
-  });
+  try {
+    const res = await fetch(`http://localhost:3000/engine/${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : '{}'
+    });
 
-  const data = await res.json();
-  updateUI(data);
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status} ${res.statusText}`);
+    }
+    
+    const data = await res.json();
+    updateUI(data);
+  } catch (err) {
+    statusEl.innerHTML = `<span style="color:red">Error: ${err.message}</span>`;
+    console.error('Engine call failed:', err);
+  }
 }
 
 /* ============================
@@ -181,7 +197,6 @@ markTieBtn.onclick = async () => {
   await callEngine("tie");
 };
 
-</script>
 </script>
 </body>
 </html>
