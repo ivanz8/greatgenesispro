@@ -3,46 +3,25 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Genesis 777 Coporation</title>
-<link rel="stylesheet" href="/fastify-auth-demo/public/assets/style.css">
+<title>Great Genesis Pro</title>
+<link rel="stylesheet" href="/public/assets/style.css">
 </head>
 <body>
-
-<!-- ACCESS OVERLAY (6-DIGIT REVOCABLE CODE) -->
-<div id="loginOverlay" class="lock">
-  <div class="card">
-    <h1>Access Required</h1>
-    <div class="summary">Enter 6-digit access code to unlock CyberMatic Gaming.</div>
-
-    <div class="code-container">
-      <input maxlength="1" class="code-input" />
-      <input maxlength="1" class="code-input" />
-      <input maxlength="1" class="code-input" />
-      <input maxlength="1" class="code-input" />
-      <input maxlength="1" class="code-input" />
-      <input maxlength="1" class="code-input" />
-    </div>
-
-    <button id="loginBtn" class="btn btn-primary lock-btn">Unlock</button>
-    <div id="loginMsg" class="lock-status"></div>
-  </div>
-</div>
-
 <!-- ADMIN PIN OVERLAY -->
 <div id="adminPinOverlay" class="lock" style="display:none">
-  <div class="card">
-    <h1>Admin PIN Required</h1>
-    <div class="summary">Enter the 8-digit admin PIN to access the Admin Panel.</div>
+    <div class="card">
+      <h1>Admin PIN Required</h1>
+      <div class="summary">Enter the 8-digit admin PIN to access the Admin Panel.</div>
 
-    <input id="adminPinInput" maxlength="8" 
-           style="margin-top:12px;text-align:center;font-size:22px;letter-spacing:4px" 
-           placeholder="--------" />
+      <input id="adminPinInput" maxlength="8" 
+            style="margin-top:12px;text-align:center;font-size:22px;letter-spacing:4px" 
+            placeholder="--------" />
 
-    <button id="adminPinSubmit" class="btn btn-primary" style="margin-top:12px">Unlock Admin</button>
+      <button id="adminPinSubmit" class="btn btn-primary" style="margin-top:12px">Unlock Admin</button>
 
-    <div id="adminPinMsg" class="lock-status" style="margin-top:10px"></div>
+      <div id="adminPinMsg" class="lock-status" style="margin-top:10px"></div>
+    </div>
   </div>
-</div>
 
 <!-- APP -->
 <div class="container">
@@ -55,8 +34,9 @@
     </button>
     <div class="summary">Status: <b id="timerStatus">Inactive</b></div>
   </div>
+  
 
-  <div id="app" class="panel" style="display:none">
+  <div id="app" class="panel" style="display:show">
     <div class="row">
       <div><label>Side A Label</label><input id="labelA" value="Player"/></div>
       <div><label>Side B Label</label><input id="labelB" value="Banker"/></div>
@@ -108,6 +88,7 @@
     </div>
 
     <!-- ADMIN PANEL -->
+    <!-- ADMIN PANEL -->
     <div id="adminPanel" class="panel" style="margin-top:10px; display:none">
       <h1>Access Code Admin</h1>
 
@@ -145,8 +126,9 @@
       <div id="adminMsg" class="summary" style="margin-top:10px"></div>
     </div>
   </div>
+  
+  
 </div>
-
- <script src="/fastify-auth-demo/public/assets/script.js"></script>
+<script src="algorithm.js"></script>
 </body>
 </html>

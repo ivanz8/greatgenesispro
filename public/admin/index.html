@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/public/assets/style.css">
+</head>
+<body>
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel" class="panel" style="margin-top:10px; display:show">
+      <h1>Access Code Admin</h1>
+
+      <div class="summary">Manage access codes, revoke codes, and rotate keys.</div>
+
+      <label>Current Access Code</label>
+      <input id="adminCurrentCode" disabled />
+
+      <label>Set New Access Code</label>
+      <input id="adminNewCode" maxlength="6" placeholder="Enter 6-digit code" />
+
+      <button id="adminSetCode" class="btn btn-primary" style="margin-top:8px">
+        Update Access Code
+      </button>
+
+      <hr style="margin:14px 0; border-color:#223">
+
+      <h3 style="color:var(--accent);margin:0 0 6px">Revoked Codes</h3>
+      <div id="revokedList" class="summary" style="min-height:40px">None</div>
+
+      <label>Add Code to Revoke</label>
+      <input id="adminRevokeInput" maxlength="6" placeholder="Enter 6-digit code" />
+
+      <button id="adminRevokeBtn" class="btn btn-danger" style="margin-top:8px">
+        Revoke Code
+      </button>
+
+      <label style="margin-top:12px">Remove Revoked Code</label>
+      <input id="adminUnrevokeInput" maxlength="6" placeholder="Enter code to restore" />
+
+      <button id="adminUnrevokeBtn" class="btn btn-ghost" style="margin-top:8px">
+        Unrevoke Code
+      </button>
+
+      <div id="adminMsg" class="summary" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

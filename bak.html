@@ -1,4 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Genesis 777 Coporation</title>
+<style>
+  :root {
+    --bg: #0a0e2a;        /* deep navy blue background */
+    --panel: #13294b;     /* darker blue panels */
+    --muted: #ffd966;     /* soft gold for muted text */
+    --accent: #ffcc00;    /* bright gold accent */
+    --white: #f0f8ff;     /* light text */
+    --danger: #ff4d4d;    /* red for danger */
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--white);
+    font-family:Inter,system-ui,Arial;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    gap:12px
+  }
+  .container{max-width:920px;margin:0 auto;padding:14px;width:100%}
+  .panel{
+    background:var(--panel);
+    padding:12px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.06)
+  }
+  h1{font-size:18px;margin:0 0 6px;color:var(--accent)}
+  label{display:block;font-size:13px;color:var(--muted);margin-top:6px}
+  input,select,button{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #233;
+    background:#061012;
+    color:var(--white);
+    font-size:14px
+  }
+  .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .row>*{flex:1}
+  .btn{border:none;border-radius:10px;cursor:pointer}
+  .btn-primary{background:var(--accent);color:#012;font-weight:700}
+  .btn-ghost{background:#223;color:var(--muted)}
+  .btn-danger{background:#361515;color:#ffbebe}
+  .log{
+    height:240px;
+    overflow:auto;
+    background:#051013;
+    padding:10px;
+    border-radius:8px;
+    font-family:monospace;
+    white-space:pre-wrap
+  }
+  .summary{color:var(--muted);font-size:14px;padding-top:6px}
 
+  /* ACCESS / PIN OVERLAYS */
+  .lock{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.9);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:9999
+  }
+  .lock .card{
+    max-width:520px;
+    width:100%;
+    background:#0d141c;
+    border:1px solid #123;
+    border-radius:14px;
+    padding:16px;
+    box-shadow:0 0 30px rgba(0,0,0,.6)
+  }
+  .lock h1{
+    margin:0 0 4px;
+    font-size:18px;
+    color:var(--accent);
+    text-align:center
+  }
+  .lock .summary{
+    text-align:center;
+    padding-top:2px
+  }
+
+  /* 6-DIGIT CODE INPUT */
+  .code-container{
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+    margin-top:14px
+  }
+  .code-input{
+    width:46px;
+    height:52px;
+    border-radius:10px;
+    border:1px solid rgba(255,204,0,.5);
+    background:#03080e;
+    color:var(--accent);
+    font-size:24px;
+    text-align:center;
+    outline:none;
+    box-shadow:0 0 10px rgba(255,204,0,.3);
+    text-shadow:0 0 6px rgba(255,204,0,.7);
+    transition:.18s ease
+  }
+  .code-input:focus{
+    transform:scale(1.06);
+    box-shadow:0 0 14px rgba(255,204,0,.7);
+  }
+
+  .lock-btn{
+    margin-top:16px
+  }
+  .lock-status{
+    margin-top:10px;
+    font-size:13px;
+    text-align:center;
+    color:var(--muted)
+  }
+  .lock-status.error{
+    color:var(--danger)
+  }
+  .lock-status.success{
+    color:#7dff8a
+  }
+</style>
+</head>
+<body>
+
+<!-- ACCESS OVERLAY (6-DIGIT REVOCABLE CODE) -->
+<div id="loginOverlay" class="lock">
+  <div class="card">
+    <h1>Access Required</h1>
+    <div class="summary">Enter 6-digit access code to unlock CyberMatic Gaming.</div>
+
+    <div class="code-container">
+      <input maxlength="1" class="code-input" />
+      <input maxlength="1" class="code-input" />
+      <input maxlength="1" class="code-input" />
+      <input maxlength="1" class="code-input" />
+      <input maxlength="1" class="code-input" />
+      <input maxlength="1" class="code-input" />
+    </div>
+
+    <button id="loginBtn" class="btn btn-primary lock-btn">Unlock</button>
+    <div id="loginMsg" class="lock-status"></div>
+  </div>
+</div>
+
+<!-- ADMIN PIN OVERLAY -->
+<div id="adminPinOverlay" class="lock" style="display:none">
+  <div class="card">
+    <h1>Admin PIN Required</h1>
+    <div class="summary">Enter the 8-digit admin PIN to access the Admin Panel.</div>
+
+    <input id="adminPinInput" maxlength="8" 
+           style="margin-top:12px;text-align:center;font-size:22px;letter-spacing:4px" 
+           placeholder="--------" />
+
+    <button id="adminPinSubmit" class="btn btn-primary" style="margin-top:12px">Unlock Admin</button>
+
+    <div id="adminPinMsg" class="lock-status" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="container">
+  <div class="panel">
+    <h1>Genesis 777 Corporation</h1>
+    <button id="openAdmin" 
+            class="btn btn-ghost" 
+            style="float:right;margin-top:-30px;width:100px;color:#ff4d4d;font-weight:700">
+      ADMIN
+    </button>
+    <div class="summary">Status: <b id="timerStatus">Inactive</b></div>
+  </div>
+
+  <div id="app" class="panel" style="display:none">
+    <div class="row">
+      <div><label>Side A Label</label><input id="labelA" value="Player"/></div>
+      <div><label>Side B Label</label><input id="labelB" value="Banker"/></div>
+      <div>
+        <label>Start Side</label>
+        <select id="startSide"><option value="a" selected>A</option><option value="b">B</option></select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div><label>Base Bet</label><input id="baseBet" type="number" value="100"/></div>
+      <div><label>Round-off Step</label><input id="roundStep" type="number" value="50"/></div>
+      <div><label>Capital</label><input id="capital" type="number" value="50000"/></div>
+    </div>
+
+    <div class="row">
+      <div><label>Lose Multiplier</label><input id="multiplier" type="number" step="0.1" value="2.5"/></div>
+      <div><label>Target Rounds</label><input id="targetRounds" type="number" value="100"/></div>
+      <div>
+        <label>Engine</label>
+        <div class="row" style="gap:6px">
+          <button id="startBtn" class="btn btn-primary">START</button>
+          <button id="stopBtn" class="btn btn-danger">STOP</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="markWin"  class="btn btn-ghost">Mark WIN</button>
+      <button id="markLose" class="btn btn-ghost">Mark LOSE</button>
+      <button id="markTie"  class="btn btn-ghost">Mark TIE/DRAW</button>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <button id="assistCopy"  class="btn btn-ghost">Copy Next Bet</button>
+      <button id="assistSpeak" class="btn btn-ghost">Speak Next Bet</button>
+    </div>
+
+    <div class="panel" style="margin-top:10px">
+      <div id="status" class="summary">
+        Ready — press START, I’ll suggest next bet & side, then you mark WIN/LOSE/TIE.
+      </div>
+      <div id="log" class="log"></div>
+    </div>
+
+    <div id="analytics" class="panel" style="margin-top:10px">
+      <h3 style="color:var(--accent);margin:0 0 6px">Analytics</h3>
+      <div id="analyticsContent" class="summary">No data yet.</div>
+    </div>
+
+    <!-- ADMIN PANEL -->
+    <div id="adminPanel" class="panel" style="margin-top:10px; display:none">
+      <h1>Access Code Admin</h1>
+
+      <div class="summary">Manage access codes, revoke codes, and rotate keys.</div>
+
+      <label>Current Access Code</label>
+      <input id="adminCurrentCode" disabled />
+
+      <label>Set New Access Code</label>
+      <input id="adminNewCode" maxlength="6" placeholder="Enter 6-digit code" />
+
+      <button id="adminSetCode" class="btn btn-primary" style="margin-top:8px">
+        Update Access Code
+      </button>
+
+      <hr style="margin:14px 0; border-color:#223">
+
+      <h3 style="color:var(--accent);margin:0 0 6px">Revoked Codes</h3>
+      <div id="revokedList" class="summary" style="min-height:40px">None</div>
+
+      <label>Add Code to Revoke</label>
+      <input id="adminRevokeInput" maxlength="6" placeholder="Enter 6-digit code" />
+
+      <button id="adminRevokeBtn" class="btn btn-danger" style="margin-top:8px">
+        Revoke Code
+      </button>
+
+      <label style="margin-top:12px">Remove Revoked Code</label>
+      <input id="adminUnrevokeInput" maxlength="6" placeholder="Enter code to restore" />
+
+      <button id="adminUnrevokeBtn" class="btn btn-ghost" style="margin-top:8px">
+        Unrevoke Code
+      </button>
+
+      <div id="adminMsg" class="summary" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
 document.addEventListener('DOMContentLoaded', () => {
   /* ==== ACCESS CODE LOGIC (REVOCABLE) ==== */
   // Current valid access code (6 digits)
@@ -64,7 +340,9 @@ document.addEventListener('DOMContentLoaded', () => {
       loginMsg.className = "lock-status success";
 
       setTimeout(() => {
-        window.location.href = 'public/user';
+        loginOverlay.style.display = 'none';
+        appEl.style.display = 'block';
+        timerStatus.textContent = 'Active';
       }, 400);
     } else {
       loginMsg.textContent = "Invalid access code.";
@@ -353,3 +631,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateStatus("Ready.");
   updateAnalytics();
 });
+</script>
+</body>
+</html>
