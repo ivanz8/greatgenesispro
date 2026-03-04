@@ -1,0 +1,50 @@
+{
+  "pins": {
+    "123456": {
+      "id": "user_001",
+      "name": "Demo User",
+      "role": "user",
+      "active": true,
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    "654321": {
+      "id": "user_002",
+      "name": "Admin User",
+      "role": "admin",
+      "active": true,
+      "createdAt": "2024-01-01T00:00:00Z"
+    },
+    "111222": {
+      "id": "user_003",
+      "name": "Test User",
+      "role": "user",
+      "active": true,
+      "createdAt": "2024-01-15T00:00:00Z"
+    },
+    "333444": {
+      "id": "user_004",
+      "name": "VIP User",
+      "role": "vip",
+      "active": true,
+      "createdAt": "2024-02-01T00:00:00Z"
+    },
+    "555666": {
+      "id": "user_005",
+      "name": "Staff User",
+      "role": "staff",
+      "active": false,
+      "createdAt": "2024-02-15T00:00:00Z"
+    },
+    "777888": {
+      "id": "user_006",
+      "name": "Manager",
+      "role": "manager",
+      "active": true,
+      "createdAt": "2024-03-01T00:00:00Z"
+    }
+  },
+  "settings": {
+    "defaultRole": "user",
+    "sessionTimeout": 3600
+  }
+}
