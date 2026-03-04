@@ -26,17 +26,19 @@
 <!-- APP -->
 <div class="container">
   <div class="panel">
-    <h1>Genesis 777 Corporation</h1>
-    <button id="openAdmin" 
-            class="btn btn-ghost" 
-            style="float:right;margin-top:-30px;width:100px;color:#ff4d4d;font-weight:700">
-      ADMIN
-    </button>
+    <h1>Great Genesis Pro</h1>
     <button id="logoutBtn" 
             class="btn btn-ghost" 
-            style="float:right;margin-top:-30px;margin-right:110px;width:100px;color:#888;font-weight:700">
+            style="float:right;margin-top:-30px;width:80px;color:#ff4d4d;font-weight:700">
       LOGOUT
     </button>
+    <button id="openAdmin" 
+            class="btn btn-ghost" 
+            
+            style="float:right;margin-top:-30px;margin-right:10px;width:80px;color:#888;font-weight:700">
+      ADMIN
+    </button>
+    
     <div class="summary">Status: <b id="timerStatus">Inactive</b></div>
   </div>
   
@@ -146,7 +148,7 @@
   } catch (err) {
     console.error('Auth check failed:', err);
     // On error, redirect to login
-    window.location.href = '/index.html';
+    window.location.href = '/public/index.html';
   }
 })();
 </script>
@@ -258,7 +260,62 @@ markLoseBtn.onclick = async () => {
 markTieBtn.onclick = async () => {
   await callEngine("tie");
 };
+assistCopy.addEventListener('click', async ()=>{
+    try{
+      const nextText = statusEl.innerText;
+      await navigator.clipboard.writeText(nextText);
+      logEl.textContent += `[${new Date().toLocaleTimeString()}] Copied next bet.\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }catch(e){
+      logEl.textContent += `[${new Date().toLocaleTimeString()}] Clipboard blocked.\n`;
+    }
+  });
 
+  assistSpeak.addEventListener('click', ()=>{
+    try{
+      const text = statusEl.innerText.replace(/\n/g, ', ');
+      const t=new SpeechSynthesisUtterance(text);
+      speechSynthesis.cancel();
+      speechSynthesis.speak(t);
+      logEl.textContent += `[${new Date().toLocaleTimeString()}] Speaking next bet.\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }catch(e){
+      logEl.textContent += `[${new Date().toLocaleTimeString()}] Speech not available.\n`;
+    }
+  });
+
+  /* ==== VOICE COMMANDS (optional) ==== */
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(SpeechRecognition){
+    try{
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.onresult = (event) => {
+        const command = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+        if (command.includes("start")) startBtn.click();
+        else if (command.includes("stop")) stopBtn.click();
+        else if (command.includes("win")) markWinBtn.click();
+        else if (command.includes("lose")) markLoseBtn.click();
+        else if (command.includes("tie")) markTieBtn.click();
+      };
+      recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+      };
+      recognition.onend = () => {
+        // Auto-restart if it stops unexpectedly
+        try { recognition.start(); } catch(e) {}
+      };
+      recognition.start();
+      logEl.textContent += `[${new Date().toLocaleTimeString()}] 🎤 Voice commands active: say 'start', 'stop', 'win', 'lose', 'tie'.\n`;
+      logEl.scrollTop = logEl.scrollHeight;
+    }catch(e){
+      logEl.textContent += `[${new Date().toLocaleTimeString()}] Voice recognition not available.\n`;
+    }
+  } else {
+    logEl.textContent += `[${new Date().toLocaleTimeString()}] Voice recognition not supported in this browser.\n`;
+  }
 </script>
 </body>
 </html>

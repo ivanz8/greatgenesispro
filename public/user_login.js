@@ -1,10 +1,3 @@
-let currentAccessCode = "";
-
-  // Revoked codes – any code here will always be denied
-  const revokedCodes = [
-    // "123456",
-    // "999999",
-  ];
 
   const loginOverlay = document.getElementById('loginOverlay');
   const loginBtn = document.getElementById('loginBtn');
